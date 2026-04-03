@@ -1,0 +1,7 @@
+dist/
+.claude/
+*.whl
+__pycache__/
+*.egg-info/
+build/
+wheelhouse_tmp/

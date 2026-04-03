@@ -1,0 +1,7 @@
+[submodule "cumm"]
+	path = cumm
+	url = https://github.com/Pointcept/cumm.git
+[submodule "spconv"]
+	path = spconv
+	url = https://github.com/Pointcept/spconv.git
+	branch = master

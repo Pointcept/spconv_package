@@ -1,0 +1,32 @@
+FROM quay.io/pypa/manylinux_2_28_x86_64
+
+# Install CUDA 13.0 toolkit from NVIDIA repo
+RUN dnf install -y dnf-plugins-core && \
+    dnf config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel8/x86_64/cuda-rhel8.repo && \
+    dnf install -y \
+        cuda-toolkit-13-0 \
+        cuda-cudart-devel-13-0 \
+        cuda-nvcc-13-0 \
+        cuda-nvrtc-devel-13-0 \
+        libcublas-devel-13-0 \
+        libcurand-devel-13-0 \
+        libcusparse-devel-13-0 \
+        libcusolver-devel-13-0 \
+    && dnf clean all
+
+# Set CUDA environment
+ENV CUDA_HOME=/usr/local/cuda-13.0
+ENV PATH=${CUDA_HOME}/bin:${PATH}
+ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH:-}
+RUN ln -sf /usr/local/cuda-13.0 /usr/local/cuda
+
+# Install auditwheel dependencies
+RUN /opt/python/cp313-cp313/bin/pip install auditwheel && \
+    ln -sf /opt/python/cp313-cp313/bin/auditwheel /usr/local/bin/auditwheel
+
+# Verify CUDA installation
+RUN nvcc --version
+
+# Create bashrc for compatibility with existing build scripts
+RUN echo 'export PATH=/usr/local/cuda/bin:$PATH' >> /etc/bashrc && \
+    echo 'export LD_LIBRARY_PATH=/usr/local/cuda/lib64:${LD_LIBRARY_PATH:-}' >> /etc/bashrc
