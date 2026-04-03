@@ -154,7 +154,7 @@ for CUDA_VER in $CUDA_VERSIONS; do
         -e SPCONV_PYTHON_LIST="$PYTHON_LIST" \
         -e BOOST_ROOT="/io/third_party/boost/boost_1_77_0" \
         -v "${SPCONV_DIR}:/io" \
-        -v "${DIST_DIR}/cumm_cu${CUDA_VER}:/io/cumm_dist:ro" \
+        -v "${DIST_DIR}/cumm_cu${CUDA_VER}:/cumm_dist:ro" \
         "$DOCKER_IMAGE" \
         bash -c "source /etc/bashrc 2>/dev/null; /io/tools/build-wheels-custom.sh"
 

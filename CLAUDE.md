@@ -189,7 +189,7 @@ docker run --rm \
   -e SPCONV_PYTHON_LIST="3.10;3.11;3.12;3.13" \
   -e BOOST_ROOT=/io/third_party/boost/boost_1_77_0 \
   -v "$(pwd):/io" \
-  -v "/path/to/cumm/dist:/io/cumm_dist:ro" \
+  -v "/path/to/cumm/dist:/cumm_dist:ro" \
   scrin/manylinux2014-cuda:cu128-devel-1.0.0 \
   bash -c "source /etc/bashrc && /io/tools/build-wheels-custom.sh"
 ```
