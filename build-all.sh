@@ -127,14 +127,14 @@ for CUDA_VER in $CUDA_VERSIONS; do
         echo "Skipping CCCL clone (bundled in CUDA ${CUDA_VER})"
     fi
 
-    chmod +x "${CUMM_DIR}/tools/build-wheels-custom.sh"
     docker run --rm \
         -e PLAT="$PLAT" \
         -e CUMM_CUDA_VERSION="$CUDA_DOTTED" \
         -e CUMM_PYTHON_LIST="$PYTHON_LIST" \
         -v "${CUMM_DIR}:/io" \
+        -v "${SCRIPT_DIR}/tools/build-cumm-wheels.sh:/build.sh:ro" \
         "$DOCKER_IMAGE" \
-        bash -c "source /etc/bashrc 2>/dev/null; /io/tools/build-wheels-custom.sh"
+        bash -c "source /etc/bashrc 2>/dev/null; bash /build.sh"
 
     echo "=== [${CUDA_VER}] cumm wheels: ==="
     ls -la "${CUMM_DIR}/dist/"
@@ -147,7 +147,6 @@ for CUDA_VER in $CUDA_VERSIONS; do
         bash -c "rm -rf /io/build /io/dist /io/wheelhouse_tmp /io/*.egg-info" 2>/dev/null || true
     mkdir -p "${SPCONV_DIR}/dist"
 
-    chmod +x "${SPCONV_DIR}/tools/build-wheels-custom.sh"
     docker run --rm \
         -e PLAT="$PLAT" \
         -e CUMM_CUDA_VERSION="$CUDA_DOTTED" \
@@ -155,8 +154,9 @@ for CUDA_VER in $CUDA_VERSIONS; do
         -e BOOST_ROOT="/io/third_party/boost/boost_1_77_0" \
         -v "${SPCONV_DIR}:/io" \
         -v "${DIST_DIR}/cumm_cu${CUDA_VER}:/cumm_dist:ro" \
+        -v "${SCRIPT_DIR}/tools/build-spconv-wheels.sh:/build.sh:ro" \
         "$DOCKER_IMAGE" \
-        bash -c "source /etc/bashrc 2>/dev/null; /io/tools/build-wheels-custom.sh"
+        bash -c "source /etc/bashrc 2>/dev/null; bash /build.sh"
 
     echo "=== [${CUDA_VER}] spconv wheels: ==="
     ls -la "${SPCONV_DIR}/dist/"
