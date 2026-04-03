@@ -1,0 +1,21 @@
+name: spconv-cu126-py311
+channels:
+  - nvidia/label/cuda-12.6.3
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - pip
+  - cuda
+  - conda-forge::cudnn
+  - gcc=13.2
+  - gxx=13.2
+  - pip:
+    - pccm>=0.4.16
+    - pybind11>=2.6.0
+    - ccimport>=0.4.4
+    - fire
+    - numpy
+    - setuptools
+    - wheel

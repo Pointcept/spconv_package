@@ -10,7 +10,10 @@ This repo builds pre-compiled wheels for [spconv](https://github.com/traveller59
 spconv_packages/
 ├── cumm/                  # Submodule: Pointcept/cumm (branch: main)
 ├── spconv/                # Submodule: Pointcept/spconv (branch: master)
-├── build-all.sh           # Unified build orchestrator
+├── build-all.sh           # Docker-based build orchestrator
+├── tools/
+│   └── build-local.sh     # Conda-based local build (no Docker)
+├── envs/                  # Conda environment files (5 CUDA × 4 Python = 20)
 ├── docker/
 │   ├── Dockerfile.cu124   # Custom image (CUDA 12.4 + GCC 13)
 │   └── Dockerfile.cu130   # Custom image (CUDA 13.0)
@@ -41,7 +44,61 @@ git submodule update --init --recursive
 | **CUDA 12.8** | yes | yes | yes | yes |
 | **CUDA 13.0** | yes | yes | yes | yes |
 
-## Build Workflow
+## Two Build Methods
+
+| Method | Tool | Produces | Best for |
+|---|---|---|---|
+| **Conda local** | `tools/build-local.sh` | 1 wheel per run (single Python) | Development, quick builds |
+| **Docker batch** | `build-all.sh` | Multiple wheels (all Pythons) | CI, production manylinux wheels |
+
+---
+
+## Method 1: Conda Local Build (No Docker)
+
+### Prerequisites
+
+- [Conda](https://docs.conda.io/) or [Mamba](https://mamba.readthedocs.io/)
+- Internet access (for conda packages and pip deps)
+
+### Quick Start
+
+```bash
+# Build for CUDA 12.8, Python 3.10
+bash tools/build-local.sh 12.8 3.10
+```
+
+This will:
+1. Create/activate conda env `spconv-cu128` from `envs/cu128-py310.yml`
+2. Build cumm wheel from `cumm/` submodule
+3. Install cumm, then build spconv wheel from `spconv/` submodule
+4. Output to `dist/cumm_cu128/` and `dist/spconv_cu128/`
+
+### Build All Python Versions for One CUDA
+
+```bash
+for py in 3.10 3.11 3.12 3.13; do
+    bash tools/build-local.sh 12.8 $py
+done
+```
+
+### Conda Environment Files
+
+Located in `envs/`, 20 files covering the full matrix. Each installs:
+- CUDA toolkit (from `nvidia/label/cuda-X.X.X` channel)
+- cuDNN (conda-forge)
+- GCC/G++ 13.2 (conda-forge, required for CUDA < 13.0 compat)
+- Python build deps via pip (pccm, pybind11, ccimport, etc.)
+
+### Create a Custom Env Manually
+
+```bash
+conda env create -f envs/cu128-py312.yml
+conda activate spconv-cu128-py312
+```
+
+---
+
+## Method 2: Docker Batch Build
 
 ### Prerequisites
 
@@ -164,7 +221,7 @@ cumm must be built **before** spconv (spconv imports cumm at build time for kern
 ## Dependency Chain
 
 ```
-spconv -> cumm >= 0.8.2 (runtime + build-time)
+spconv -> cumm >= 0.8.2, < 0.9.0 (runtime + build-time)
 cumm   -> pccm, pybind11, ccimport (build-time)
 spconv -> pccm, pybind11, ccimport, Boost 1.77.0 (build-time)
 cumm   -> CCCL (cloned into third_party/cccl during build, except CUDA 13.0+)
